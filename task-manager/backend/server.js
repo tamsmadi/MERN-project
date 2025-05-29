@@ -4,6 +4,9 @@ require('dotenv').config();
 const app = express();
 const Task = require('./models/task'); // Adjust the path as necessary
 
+const cors = require('cors');
+app.use(cors({ origin: 'http://localhost:3000' }));
+
 // app.listen(3000, () => {
 //   console.log("Server is running on localhost http://localhost:3000");
 // });
@@ -34,6 +37,20 @@ app.get("/api/tasks", async (req, res) => {
     res.json(tasks);
   } catch (err) {
     console.error("Error fetching tasks:", err.message);
+    res.status(500).json({ message: "Internal server error" });
+  }
+});
+
+app.delete("/api/tasks/:id", async (req, res) => {
+  const taskId = req.params.id;
+  try {
+    const task = await Task.findByIdAndDelete(taskId);
+    if (!task) {
+      return res.status(404).json({ message: "Task not found" });
+    }
+    res.json({ message: "Task deleted successfully" });
+  } catch (err) {
+    console.error("Error deleting task:", err.message);
     res.status(500).json({ message: "Internal server error" });
   }
 });
